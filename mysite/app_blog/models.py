@@ -7,15 +7,27 @@ from django.urls import reverse
 
 
 class Category(models.Model):
-    category = models.CharField(u'Категорія', max_length=250, help_text=u'Максимум 250 символів')
-    slug = models.SlugField(u'Слаг', default='')
+    category = models.CharField(u'Категорія',
+                                max_length=250,
+                                help_text=u'Максимум 250 символів')
+    slug = models.SlugField(u'Слаг')
+    objects = models.Manager()
 
     class Meta:
         verbose_name = u'Категорія для публікації'
         verbose_name_plural = u'Категорії для публікацій'
 
-    def   str (self):
+    def __str__(self):
         return self.category
+
+    def get_absolute_url(self):
+        try:
+            url = reverse('articles-category-list',
+                          kwargs={'slug': self.slug})
+        except:
+            url = '/'
+        return url
+
 
 class Article(models.Model):
     title = models.CharField(u'Заголовок', max_length=250, help_text=u'Максимум 250 символів')
@@ -37,16 +49,24 @@ class Article(models.Model):
 
     def get_absolute_url(self):
         try:
-            url = reverse('news-detail', kwargs={'year': self.pub_date.strftime("%Y"), 'month': self.pub_date.strftime("%m"), 'day': self.pub_date.strftime("%d"), 'slug': self.slug})
+            url = reverse('news-detail', kwargs={'year': self.pub_date.strftime("%Y"),
+                                                 'month': self.pub_date.strftime("%m"),
+                                                 'day': self.pub_date.strftime("%d"),
+                                                 'slug': self.slug})
         except:
             url = "/"
         return url
 
 
 class ArticleImage(models.Model):
-    article = models.ForeignKey(Article, verbose_name=u'Стаття', related_name='images', on_delete=models.CASCADE)
+    article = models.ForeignKey(Article,
+                                verbose_name=u'Стаття',
+                                related_name='images',
+                                on_delete=models.CASCADE)
     image = models.ImageField(u'Фото', upload_to='photos')
-    title = models.CharField(u'Заголовок', max_length=250, help_text=u'Максимум 250 символів', blank=True)
+    title = models.CharField(u'Заголовок', max_length=250,
+                             help_text=u'Максимум 250 символів',
+                             blank=True)
 
     class Meta:
         verbose_name = u'Фото для статті'
